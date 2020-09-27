@@ -1,92 +1,38 @@
 const express = require("express");
-const Register = require("../models/Register");
 const Login = require("../models/Login");
-const User = require("../models/User");
+const Power = require("../models/Power");
+const Townhall = require("../models/Townhall");
+const controllers = require("../controllers/userController");
+const userRoutes = require("./userRoutes")
+const powerRoutes = require("./powerRoutes")
 const appRoute = express.Router();
 
-// user
+// take userRoutes
+appRoute.use('/user', userRoutes);
+appRoute.use('/power', powerRoutes);
 
-appRoute.post("/User", (req, res) => {
-    const{ 
-        name,
-        email,
-        password 
+
+appRoute.post("/townhall", (req, res) => {
+    const{
+        townhalltype
     } = req.body;
 
-    register.create({ 
-        name : name,
-        email : email,
-        password : password,
+    Townhall.create({ 
+        townhalltype: townhalltype,
     })
     .then((result) => {
-        res.status(201).json({
-            msg : "Success Created",
-            data : result,
+        res.status(201).send({
+            msg :"Success Created",
+            data: result
         });
     })
     .catch((err) => {
-        res.status(404).send({ 
-            msg : "Not Found",
-            details : err,
+        res.status(500).send({
+            msg : "Error can not Created",
+            result: err
         });
     });
 });
-
-// POST Untuk creat new player
-
-appRoute.post("/Register", (req, res) => {
-  const { name, email, password } = req.body;
-  Register.create({
-    name: name,
-    email: email,
-    password: password,
-  })
-    .then((result) => {
-      res.status(201).json({
-        msg: "success",
-        data: result,
-      });
-    })
-    .catch((err) => {
-      res.status(404).json({
-        msg: "Not Found register",
-        details: err.message,
-      });
-    });
-});
-
-// Login
-
-appRoute.post("/Login", (req, res) =>{
-  const {email, password} = req.body;
-  Login.create({
-    email: email,
-    password: password,
-  })
-
-Login.findOne({email: email})
-.then((result) => {
-    if (result) {
-    if (password === result.password){
-        res.status(200).json({
-            msg : "Welcom in Arena",
-        })
-    }
-}else{
-        res.status(401).json({
-            msg : "Wrong Email or Password combination",
-        })
-    }
-
-})
-.catch((err) =>{
-    res.status(500).json({
-        msg : "failed to fetch login",
-        details : err,
-    })
-})
- 
-})
 
 
 module.exports = appRoute;
