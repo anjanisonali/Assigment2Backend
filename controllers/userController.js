@@ -1,25 +1,32 @@
-const express = require('express')
-const User = require('../models/User')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const appRoute = express.Router();
+const User = require('../models/User');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-
-appRoute.get('/user', (req, res) => {
-    User.find()
-    .populate('powers')
-    .then((result) =>{
-        res.status(200).send({
-            msg : 'Success',
-            data: result
-        })
-        .catch((err) => {
-            res.status(500).send({
-                msg: 'error fetch user', 
-                data : err
-            })
-        })
-    })
+class userController{
+    static register(req, res, next){
+        const {email, password} = req.body;
+        const user = new User({
+            email,
+            password,
+        });
+user.save().then((user) =>{
+    res.status(201).json({success: true, data: {_id: user._id, email: user.email}});
 })
+.catch(next);
+    }
 
-module.exports = appRoute;
+
+    static login(req, res, next) {
+        const { email, password } = req.body;
+        User.findOne({ email })
+          .then((user) => {
+            if (user && bcrypt.compareSync(password, user.password)) {
+              const access_token = jwt.sign({ _id: user._id }, 'ASSIGMENT_GAME');
+              res.status(200).json({ success: true, access_token });
+            } else throw { name: 'LOGIN_FAIL' };
+          })
+          .catch(next);
+      }
+    }
+
+module.exports = userController;
